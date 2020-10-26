@@ -76,8 +76,7 @@ class PhoenixCorpus(Corpus):
         return sorted(frames)
 
 
-if __name__ == "__main__":
-    df = PhoenixCorpus("data/phoenix-2014-multisigner/").load_data_frame(
-        "train", aligned_annotation=True
-    )
-    print(df)
+class PhoenixTCorpus(PhoenixCorpus):
+    def __init__(self):
+        # TODO:
+        raise NotImplementedError
