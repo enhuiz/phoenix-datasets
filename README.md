@@ -13,7 +13,8 @@ from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
 
 dtrain = PhoenixVideoTextDataset(
-    "data/phoenix-2014-multisigner", # your path to this folder, download it from official website first.
+    # your path to this folder, download it from official website first.
+    root="data/phoenix-2014-multisigner",
     split="train",
     p_drop=0.5,
     random_drop=True,
