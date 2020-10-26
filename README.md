@@ -4,6 +4,12 @@
 
 [PHOENIX-2014](https://www-i6.informatik.rwth-aachen.de/~koller/RWTH-PHOENIX/) and [PHOENIX-2014-T](https://www-i6.informatik.rwth-aachen.de/~koller/RWTH-PHOENIX-2014-T/) are popular large scale German sign language datasets developed by Human Language Technology & Pattern Recognition Group from RWTH Aachen University, Germany. This package provides a PyTorch dataset wrapper for those two datasets to make the building of PyTorch model on these two datasets easier.
 
+## Installation
+
+```bash
+pip install git+https://github.com/enhuiz/phoenix-datasets
+```
+
 ## Example Usage
 
 ```python
