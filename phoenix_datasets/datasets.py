@@ -39,7 +39,6 @@ class VideoTextDataset(Dataset):
 
         self.data_frame = self.corpus.load_data_frame(split)
         self.vocab = vocab or self.corpus.create_vocab()
-        self.to_tensor = transforms.ToTensor()
 
     def sample_indices(self, n):
         p_kept = 1 - self.p_drop

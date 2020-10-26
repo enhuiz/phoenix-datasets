@@ -16,7 +16,6 @@ pip install git+https://github.com/enhuiz/phoenix-datasets
 from phoenix_datasets import PhoenixVideoTextDataset
 
 from torch.utils.data import DataLoader
-from torch.nn.utils.rnn import pad_sequence
 
 dtrain = PhoenixVideoTextDataset(
     # your path to this folder, download it from official website first.
