@@ -1,5 +1,5 @@
 from .datasets import VideoTextDataset
-from .corpus import PhoenixCorpus, PhoenixTCorpus
+from .corpora import PhoenixCorpus, PhoenixTCorpus
 
 
 class PhoenixVideoTextDataset(VideoTextDataset):
