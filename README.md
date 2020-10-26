@@ -50,9 +50,10 @@ for batch in dl:
 
 ## Supported Features
 
-- [x] Load automatic alignment for PHOENIX-2014
-- [x] Random/evenly frame dropping augmentation
+- [x] Load the automatic alignments for PHOENIX-2014
+- [x] Randomly/evenly frame dropping augmentation
 
 ## TODOs
 
 - [ ] Implement Corpus for PHOENIX-2014-T
+- [ ] Evaluation Wrappers
