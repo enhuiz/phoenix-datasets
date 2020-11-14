@@ -6,7 +6,7 @@ with open("README.md", "r") as f:
 setup(
     name="phoenix_datasets",
     python_requires=">=3.6.0",
-    version="0.0.1",
+    version="0.0.1.dev0",
     description="PyTorch dataset wrappers for PHOENIX 2014 & PHOENIX-2014-T sign language datasets.",
     author="enhuiz",
     author_email="niuzhe.nz@outlook.com",
