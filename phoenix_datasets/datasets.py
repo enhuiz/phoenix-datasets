@@ -48,9 +48,9 @@ class VideoTextDataset(Dataset):
             indices = indices[: int(n * p_kept)]
             indices = sorted(indices)
         else:
-            indices = np.arange(0, len(values), 1 / p_kept)
+            indices = np.arange(0, n, 1 / p_kept)
             indices = np.round(indices)
-            indices = np.clip(indices, 0, len(indices))
+            indices = np.clip(indices, 0, n - 1)
             indices = indices.astype(int)
         return indices
 
