@@ -34,15 +34,18 @@ dl = DataLoader(dtrain, collate_fn=dtrain.collate_fn)
 for batch in dl:
     video = batch["video"]
     text = batch["text"]
+    signer = batch["signer"]
 
     # Do per-frame augmentation (e.g. normalization, cropping) here if needed.
     # kornia will be a good tool for this
     # video = augment(video)
 
     assert len(video) == len(text)
+
     print(len(video))
     print(video[0].shape)
     print(text[0].shape)
+    print(signer)
 
     break
 ```
