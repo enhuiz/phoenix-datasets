@@ -85,4 +85,5 @@ class VideoTextDataset(Dataset):
         for sample in batch:
             collated["video"].append(torch.tensor(sample["video"]).float())
             collated["text"].append(torch.tensor(sample["text"]).long())
+            collated["signer"].append(sample["signer"])
         return dict(collated)
