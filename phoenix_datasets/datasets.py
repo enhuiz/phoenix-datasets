@@ -72,10 +72,12 @@ class VideoTextDataset(Dataset):
 
         texts = list(map(self.vocab, sample["annotation"]))
 
-        return {
-            "video": frames,
-            "text": texts,
-        }
+        sample.update(
+            video=frames,
+            text=texts,
+        )
+
+        return sample
 
     @staticmethod
     def collate_fn(batch):
