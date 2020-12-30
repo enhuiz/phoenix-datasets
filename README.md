@@ -12,6 +12,8 @@ pip install git+https://github.com/enhuiz/phoenix-datasets
 
 ## Example Usage
 
+### Dataset
+
 ```python
 from phoenix_datasets import PhoenixVideoTextDataset
 
@@ -50,12 +52,25 @@ for batch in dl:
     break
 ```
 
+### Evaluation
+
+Go to `phoenix-2014-multisigner/evaluation/NIST-sclite_sctk-2.4.0-20091110-0958.tar.bz2` to install `sclite` (the official tool for WER calculation) first and then put it in your PATH.
+
+```python
+evaluator = PhoenixEvaluator("data/phoenix-2014-multisigner")
+hyp = evaluator.corpus.load_data_frame("dev")["annotation"].apply(" ".join).tolist()
+hyp[0] = "THIS SENTENCE IS WRONG"
+results = evaluator.evaluate("dev", hyp)
+print(results["parsed_dtl"])
+print(results["sum"])
+```
+
 ## Supported Features
 
 - [x] Load the automatic alignments for PHOENIX-2014
 - [x] Randomly/evenly frame dropping augmentation
+- [x] Evaluation for Phoenix-2014
 
 ## TODOs
 
-- [ ] Implement Corpus for PHOENIX-2014-T
-- [ ] Evaluation Wrappers
+- [ ] Implement Corpus and evaluation for PHOENIX-2014-T

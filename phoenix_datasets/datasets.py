@@ -8,6 +8,21 @@ from torchvision import transforms
 from collections import defaultdict
 
 
+class defaultdict_with_warning(defaultdict):
+    warned = set()
+    warning_enabled = False
+
+    def __getitem__(self, key):
+        if key == "text" and key not in self.warned and self.warning_enabled:
+            print(
+                'Warning: using batch["text"] to obtain label is deprecated, '
+                'please use batch["label"] instead.'
+            )
+            self.warned.add(key)
+
+        return super().__getitem__(key)
+
+
 def load_pil(path):
     # convert back to numpy as tensor in dataloader may cause
     # fd problem: https://github.com/pytorch/pytorch/issues/11201
@@ -70,20 +85,28 @@ class VideoTextDataset(Dataset):
         frames = self.select_elements(frames, indices)
         frames = np.stack(list(map(load_pil, frames)))
 
-        texts = list(map(self.vocab, sample["annotation"]))
+        label = list(map(self.vocab, sample["annotation"]))
 
         sample.update(
             video=frames,
-            text=texts,
+            label=label,
         )
 
         return sample
 
     @staticmethod
     def collate_fn(batch):
-        collated = defaultdict(list)
+        collated = defaultdict_with_warning(list)
+
         for sample in batch:
             collated["video"].append(torch.tensor(sample["video"]).float())
-            collated["text"].append(torch.tensor(sample["text"]).long())
+            collated["label"].append(torch.tensor(sample["label"]).long())
+            # using text is deprecated, label is prefered
+            collated["text"].append(torch.tensor(sample["label"]).long())
             collated["signer"].append(sample["signer"])
+            collated["annotation"].append(sample["annotation"])
+            collated["id"].append(sample["id"])
+
+        collated.warning_enabled = True
+
         return dict(collated)

@@ -18,7 +18,10 @@ class Corpus:
     def create_vocab(self, data_frame=None):
         df = data_frame or self.load_data_frame("train")
         sentences = df["annotation"].to_list()
-        return LookupTable([gloss for sentence in sentences for gloss in sentence])
+        return LookupTable(
+            [gloss for sentence in sentences for gloss in sentence],
+            allow_unk=True,
+        )
 
 
 class PhoenixCorpus(Corpus):
@@ -55,6 +58,7 @@ class PhoenixCorpus(Corpus):
     def load_data_frame(self, split, aligned_annotation=False):
         """Load corpus."""
         path = self.root / "annotations" / "manual" / f"{split}.corpus.csv"
+
         df = pd.read_csv(path, sep="|")
         df["annotation"] = df["annotation"].apply(str.split)
 
@@ -68,6 +72,8 @@ class PhoenixCorpus(Corpus):
             df = pd.merge(df, adf, "left", "id")
 
         df["folder"] = split + "/" + df["folder"].apply(lambda s: s.rsplit("/", 1)[0])
+
+        df = df.sort_values("id")
 
         return df
 
