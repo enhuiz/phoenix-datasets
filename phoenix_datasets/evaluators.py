@@ -76,7 +76,7 @@ class PhoenixEvaluator:
                     content = f.read()
                 with open(path, "w") as f:
                     f.write(content.replace("\t", " " * 8))
-                print(f"==> Indent is fixed for {path}")
+                print(f"==> Indent is fixed for {path}.")
             elif "out of range" not in output:
                 print(e.output)
                 raise e

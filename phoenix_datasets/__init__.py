@@ -1,6 +1,6 @@
 from .datasets import VideoTextDataset
 from .corpora import PhoenixCorpus, PhoenixTCorpus
-from .evaluator import PhoenixEvaluator
+from .evaluators import PhoenixEvaluator
 
 
 class PhoenixVideoTextDataset(VideoTextDataset):
