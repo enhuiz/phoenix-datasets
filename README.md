@@ -57,6 +57,8 @@ for batch in dl:
 Go to `phoenix-2014-multisigner/evaluation/NIST-sclite_sctk-2.4.0-20091110-0958.tar.bz2` to install `sclite` (the official tool for WER calculation) first and then put it in your PATH.
 
 ```python
+from phoenix_datasets.evaluators import PhoenixEvaluator
+
 evaluator = PhoenixEvaluator("data/phoenix-2014-multisigner")
 hyp = evaluator.corpus.load_data_frame("dev")["annotation"].apply(" ".join).tolist()
 hyp[0] = "THIS SENTENCE IS WRONG"
