@@ -3,20 +3,20 @@ from pathlib import Path
 from pandarallel import pandarallel
 from functools import partial
 
-from .utils import LookupTable
+from .utils import LookupTable, SRILM
 
-pandarallel.initialize(verbose=1)
+pandarallel.initialize(verbose=0)
 
 
 class Corpus:
     def __init__(self, root):
-        pass
+        self.root = Path(root)
 
     def load_data_frame(self, split):
         raise NotImplementedError
 
-    def create_vocab(self, data_frame=None):
-        df = data_frame or self.load_data_frame("train")
+    def create_vocab(self):
+        df = self.load_data_frame("train")
         sentences = df["annotation"].to_list()
         return LookupTable(
             [gloss for sentence in sentences for gloss in sentence],
@@ -25,8 +25,11 @@ class Corpus:
 
 
 class PhoenixCorpus(Corpus):
+    mean = [0.53724027, 0.5272855, 0.51954997]
+    std = [1, 1, 1]
+
     def __init__(self, root):
-        self.root = Path(root)
+        super().__init__(root)
 
     def load_alignment(self):
         dirname = self.root / "annotations" / "automatic"
@@ -80,6 +83,10 @@ class PhoenixCorpus(Corpus):
     def get_frames(self, sample, type):
         frames = (self.root / "features" / type / sample["folder"]).glob("*.png")
         return sorted(frames)
+
+    def create_lm(self):
+        path = self.root / "models" / "LanguageModel" / "MS-train-4gram.sri.lm.gz"
+        return SRILM(path, self.create_vocab())
 
 
 class PhoenixTCorpus(PhoenixCorpus):

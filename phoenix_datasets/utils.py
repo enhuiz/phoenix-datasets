@@ -1,3 +1,8 @@
+import subprocess
+import re
+import arpa
+
+
 class LookupTable:
     def __init__(self, words=None, symbols=None, allow_unk=False):
         """
@@ -38,3 +43,40 @@ class LookupTable:
     def __str__(self):
         unk = {"unk": len(self) - 1} if self.allow_unk else {}
         return str({**self.mapping, **unk})
+
+
+class SRILM:
+    def __init__(self, path, vocab):
+        self.lm = arpa.loadf(path)[0]
+        self.vocab = vocab
+
+    def __call__(self, indices):
+        """
+        probability p(end|in, the) = lm("in the end")
+        """
+        sentence = " ".join([self.vocab[i] for i in indices])
+
+        def sub(a, b):
+            nonlocal sentence
+            sentence = re.sub(a, b, sentence)
+
+        sub("<unk>", "[UNKNOWN]")
+        sub("-PLUSPLUS", "")
+        sub("loc-", "")
+        sub("cl-", "")
+        sub("qu-", "")
+        sub("poss-", "")
+        sub("lh-", "")
+        sub("__PU__", "")
+        sub("__EMOTION__", "")
+        sub("__LEFTHAND__", "")
+        sub("S0NNE", "SONNE")
+        sub("HABEN2", "HABEN")
+        sub("WIE AUSSEHEN", "WIE-AUSSEHEN")
+        sub(r"ZEIGEN[ $]", "ZEIGEN-BILDSCHIRM ")
+        sub("RAUM", "")
+
+        try:
+            return self.lm.p("<s> " + sentence)
+        except Exception as e:
+            return 0
