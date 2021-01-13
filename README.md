@@ -25,6 +25,9 @@ dtrain = PhoenixVideoTextDataset(
     split="train",
     p_drop=0.5,
     random_drop=True,
+    random_crop=True,
+    base_size=[256, 256]
+    crop_size=[224, 224],
 )
 
 vocab = dtrain.vocab
@@ -37,10 +40,6 @@ for batch in dl:
     video = batch["video"]
     label = batch["label"]
     signer = batch["signer"]
-
-    # Do per-frame augmentation (e.g. normalization, cropping) here if needed.
-    # kornia will be a good tool for this
-    # video = augment(video)
 
     assert len(video) == len(label)
 
@@ -72,6 +71,7 @@ print(results["sum"])
 - [x] Load the automatic alignments for PHOENIX-2014
 - [x] Randomly/evenly frame dropping augmentation
 - [x] Evaluation for Phoenix-2014
+- [x] Language Model
 
 ## TODOs
 
