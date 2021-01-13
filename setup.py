@@ -19,6 +19,7 @@ setup(
         "torch",
         "torchvision",
         "pandarallel",
+        "arpa",
     ],
     url="https://github.com/enhuiz/phoenix_datasets",
 )
