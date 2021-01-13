@@ -32,8 +32,7 @@ class PhoenixEvaluator:
                 f'Check "{sclite_installer}" for detail.'
             )
         self.corpus = PhoenixCorpus(root)
-        self.folder = root / "evaluation"
-        self.fix_scripts()
+        self.folder = (root / "evaluation").absolute()
 
     @staticmethod
     def make_ctm(ids, sentences):
@@ -50,25 +49,31 @@ class PhoenixEvaluator:
         return ctm
 
     def fix_scripts(self):
-        """On ubuntu 20.04, this scripts has some errors as commented below"""
+        """
+        On ubuntu 20.04, this scripts has some errors as commented below.
+        Call this in the tmpdir to fix them without modify the original script.
+        """
         self.fix_main_script()
         self.fix_mergectmstm()
 
     def fix_main_script(self):
-        """Change line 23 from mergectmstm.py => ./mergectmstm.py"""
-        path = self.folder / "evaluatePhoenix2014.sh"
+        """
+        Change line 23 from mergectmstm.py => ./mergectmstm.py
+        Change line 28, add dtl report
+        """
+        path = "./evaluatePhoenix2014.sh"
         with open(path, "r") as f:
             content = f.read()
-        if "./mergectmstm.py" not in content:
-            with open(path, "w") as f:
-                f.write(content.replace("mergectmstm.py", "./mergectmstm.py"))
-            print(f'==> "./evaluatePhoenix2014.sh: line 23" is fixed.')
+        content = content.replace("mergectmstm.py", "./mergectmstm.py")
+        content = content.replace("-o sgml sum rsum pra", "-o sgml sum rsum pra dtl")
+        with open(path, "w") as f:
+            f.write(content)
 
     def fix_mergectmstm(self):
         """Fix python indent."""
-        path = self.folder / "mergectmstm.py"
+        path = "./mergectmstm.py"
         try:
-            result = subprocess.check_output([str(path)], stderr=subprocess.STDOUT)
+            result = subprocess.check_output([path], stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             output = e.output.decode("utf8")
             if "TabError" in output:
@@ -76,7 +81,6 @@ class PhoenixEvaluator:
                     content = f.read()
                 with open(path, "w") as f:
                     f.write(content.replace("\t", " " * 8))
-                print(f"==> Indent is fixed for {path}.")
             elif "out of range" not in output:
                 print(e.output)
                 raise e
@@ -108,33 +112,36 @@ class PhoenixEvaluator:
 
         return dtl
 
-    def evaluate(self, split, hyps, results=["sum", "dtl", "pra"]):
+    def link_files(self):
+        for name in [
+            "evaluatePhoenix2014.sh",
+            "mergectmstm.py",
+            "phoenix2014-groundtruth-dev.stm",
+            "phoenix2014-groundtruth-test.stm",
+        ]:
+            shutil.copy(self.folder / name, name)
+
+    def evaluate(self, split, hyps, reports=["sum", "dtl", "pra"]):
         df = self.corpus.load_data_frame(split)
         df = df.sort_values("id")
 
         if len(df) != len(hyps):
-            print(
-                f"Warning: expect #hyps to be {len(df)} for {split}, "
-                f"but got {len(hyps)}."
-            )
-
-        script = "./evaluatePhoenix2014.sh"
+            print(f"Warning: #hyps should be {len(df)} for {split}, got {len(hyps)}.")
 
         out = {}
         ctm = self.make_ctm(df["id"], hyps)
         shell = partial(subprocess.check_output, shell=True)
-        with working_directory(self.folder):
-            tmp = Path(tempfile.mkstemp(dir=".")[1]).name
-            ctm.to_csv(tmp, index=None, header=None, sep=" ")
-            shell([f"{script} {tmp} {split}"])
-            shell([f"sclite -h out.{tmp} ctm -r tmp.stm stm -f 0 -o dtl"])
-            for r in results:
-                ext = "sys" if r == "sum" else r
-                out[r] = shell([f"cat out.{tmp}.{ext}"]).decode("utf8")
-            # shell([f"rm out.*"])
-            shell([f"rm {tmp}*"])
+        with tempfile.TemporaryDirectory() as tmpdir:
+            with working_directory(tmpdir):
+                self.link_files()
+                self.fix_scripts()
+                ctm.to_csv("hypothesis.ctm", index=None, header=None, sep=" ")
+                shell([f"./evaluatePhoenix2014.sh hypothesis.ctm {split}"])
+                for r in reports:
+                    ext = "sys" if r == "sum" else r
+                    out[r] = shell([f"cat out.hypothesis.ctm.{ext}"]).decode("utf8")
 
-        if "dtl" in results:
+        if "dtl" in reports:
             out["parsed_dtl"] = self.parse_dtl(out["dtl"])
 
         return out
