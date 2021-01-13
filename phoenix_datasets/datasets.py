@@ -23,18 +23,20 @@ class defaultdict_with_warning(defaultdict):
         return super().__getitem__(key)
 
 
-def load_pil(path):
-    # convert back to numpy as tensor in dataloader may cause
-    # fd problem: https://github.com/pytorch/pytorch/issues/11201
-    # and you probably don't want:
-    # torch.multiprocessing.set_sharing_strategy('file_system')
-    return transforms.functional.to_tensor(Image.open(path)).numpy()
-
-
 class VideoTextDataset(Dataset):
     Corpus = None
 
-    def __init__(self, root, split, p_drop=0, random_drop=True, vocab=None):
+    def __init__(
+        self,
+        root,
+        split,
+        p_drop=0,
+        random_drop=True,
+        random_crop=True,
+        base_size=[256, 256],
+        crop_size=[224, 224],
+        vocab=None,
+    ):
         """
         Args:
             root: Root to the data set, e.g. the folder contains features/ annotations/ etc..
@@ -54,6 +56,16 @@ class VideoTextDataset(Dataset):
 
         self.data_frame = self.corpus.load_data_frame(split)
         self.vocab = vocab or self.corpus.create_vocab()
+        self.transform = transforms.Compose(
+            [
+                transforms.Resize(base_size),
+                transforms.RandomCrop(crop_size)
+                if random_crop
+                else transforms.CenterCrop(crop_size),
+                transforms.ToTensor(),
+                transforms.Normalize(self.Corpus.mean, self.Corpus.std),
+            ]
+        )
 
     def sample_indices(self, n):
         p_kept = 1 - self.p_drop
@@ -69,10 +81,6 @@ class VideoTextDataset(Dataset):
             indices = indices.astype(int)
         return indices
 
-    @staticmethod
-    def select_elements(l, indices):
-        return [l[i] for i in indices]
-
     def __len__(self):
         return len(self.data_frame)
 
@@ -82,8 +90,10 @@ class VideoTextDataset(Dataset):
 
         indices = self.sample_indices(len(frames))
 
-        frames = self.select_elements(frames, indices)
-        frames = np.stack(list(map(load_pil, frames)))
+        frames = [frames[i] for i in indices]
+        frames = map(Image.open, frames)
+        frames = map(self.transform, frames)
+        frames = np.stack(list(frames))
 
         label = list(map(self.vocab, sample["annotation"]))
 
