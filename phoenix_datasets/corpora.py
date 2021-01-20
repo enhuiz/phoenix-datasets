@@ -3,7 +3,8 @@ from pathlib import Path
 from pandarallel import pandarallel
 from functools import partial
 
-from .utils import LookupTable, SRILM
+from .utils import LookupTable
+from .language_model import SRILM
 
 pandarallel.initialize(verbose=0)
 

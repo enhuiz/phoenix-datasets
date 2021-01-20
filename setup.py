@@ -22,4 +22,5 @@ setup(
         "arpa",
     ],
     url="https://github.com/enhuiz/phoenix_datasets",
+    package_data={"phoenix_datasets": ["data/*"]},
 )
